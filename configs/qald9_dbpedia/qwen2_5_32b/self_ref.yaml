@@ -1,0 +1,47 @@
+
+# --- Self-Refine Task Configuration ---
+self_refine_nle_gen: True
+self_refine_dbg: false
+# Dataset & Paths for self_refine
+self_refine_dataset: QALD9
+self_refine_knowledge_graph: dbpedia
+self_refine_data_path:  utils/datasets/qald9_dbpedia/qald-9-train-multilingual.json 
+self_refine_base_cache_path: Final_exp_collection/qald9_dbpedia/raw_complete_qwen_2_5_32b/data_obj_QALD9_dbpedia_Qwen2_5_Qwen_Qwen2_5-32B-Instruct.pk
+self_refine_log_dir: logs
+self_refine_results_save_path: eval_results
+self_refine_raw_save_path: Final_exp_collection/qald9_dbpedia/qwen_25_32b_self_refine
+
+# --- Self-Refine NL Explanation Configuration (nle_config) ---
+self_refine_nle_llm_name: Qwen2.5
+self_refine_nle_model_version: Qwen/Qwen2.5-32B-Instruct
+self_refine_nle_temperature: 0.0
+self_refine_nle_max_tokens: -1
+self_refine_nle_response_format_json: true
+self_refine_nle_json_parsable: true
+self_refine_nle_max_attempts: 3
+self_refine_nle_wait_seconds: 1
+self_refine_nle_gen_use_label: true
+self_refine_nle_gen_use_question: false
+self_refine_nle_gen_use_layout: true
+self_refine_nle_gen_use_parsed: true
+self_refine_nle_gen_remove_corr: true
+self_refine_nle_gen_remove_few_shot: False
+self_refine_nle_gen_use_raw_query: false
+
+# --- Self-Refine Feedback Configuration (feedback_config) ---
+self_refine_feedback_llm_name: gpt-4o-2024-08-06
+self_refine_feedback_temperature: 0.2
+
+# --- Self-Refine Refine Query Configuration (refine_config) ---
+self_refine_refine_query_llm_name: Qwen2.5
+self_refine_refine_query_model_version: Qwen/Qwen2.5-32B-Instruct
+self_refine_refine_query_temperature: 0.0
+self_refine_refine_query_max_tokens: -1
+self_refine_refine_query_response_format_json: false
+
+# --- Self-Refine Pipeline Control ---
+self_refine_max_iterations: 5
+self_refine_if_ground: false
+self_refine_if_nl_exp: false
+self_refine_if_external: false
+self_refine_debug: false

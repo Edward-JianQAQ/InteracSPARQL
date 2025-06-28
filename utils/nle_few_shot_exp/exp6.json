@@ -1,0 +1,89 @@
+{
+    "Overall NL explanation": "This SPARQL query calculates the average number of spouses that heads of state have. It first identifies all heads of state for each country and counts the number of distinct spouses each head of state has. Then, it calculates the average of these counts to determine the average number of spouses per head of state.",
+    "Query Type": {
+        "SPARQL": "SELECT (AVG(?spouseCount) AS ?result)",
+        "Explanation": "This is a SELECT query that retrieves data from the dataset. It uses an aggregate function AVG to calculate the average number of spouses per head of state."
+    },
+    "Variables": {
+        "Description": "The query retrieves the following variable:",
+        "Variables": [
+            {
+                "Variable": "?result",
+                "SPARQL": "SELECT (AVG(?spouseCount) AS ?result)",
+                "Explanation": "The variable ?result holds the average number of spouses that heads of state have, calculated from the spouse counts."
+            }
+        ]
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "group (subquery)",
+                "SPARQL": "{SELECT (COUNT(DISTINCT ?spouse) AS ?spouseCount) WHERE{?country wdt:P31 wd:Q6256. ?country p:P35/ps:P35 ?hos. OPTIONAL {?hos wdt:P26 ?spouse}} GROUP BY ?hos}",
+                "Explanation": "This subquery identifies all heads of state and counts the number of distinct spouses each head of state has. The results are grouped by each head of state to ensure the count is specific to each individual.",
+                "Subquery Pattern": {
+                    "Overall NL explanation": "The subquery determines the number of distinct spouses for each head of state. It does this by listing all heads of state and their spouses, then counting the distinct spouses for each head of state.",
+                    "Query Type": {
+                        "SPARQL": "SELECT (COUNT(DISTINCT ?spouse) AS ?spouseCount)",
+                        "Explanation": "This is a SELECT query that counts the distinct spouses for each head of state."
+                    },
+                    "Variables": {
+                        "Description": "The subquery retrieves the following variable:",
+                        "Variables": [
+                            {
+                                "Variable": "?spouseCount",
+                                "SPARQL": "SELECT (COUNT(DISTINCT ?spouse) AS ?spouseCount) GROUP BY ?hos",
+                                "Explanation": "The variable (?spouseCount) holds the count of distinct spouses for each head of state (?hos) |COUNT(DISTINCT ?spouse) AS ?spouseCount|. The results are grouped by (?hos) to ensure the count is specific to each head of state |GROUP BY ?hos|."
+                            }
+                        ]
+                    },
+                    "Patterns": {
+                        "Description": "The subquery includes the following patterns and operations:",
+                        "Modules": [
+                            {
+                                "Module": "bgp",
+                                "SPARQL": "?country wdt:P31 wd:Q6256",
+                                "Explanation": "Identify entities (?country) that are instances of [country] <wd:Q6256>. Here, <wdt:P31> is the property for [instance of], and <wd:Q6256> is the entity for [country]."
+                            },
+                            {
+                                "Module": "bgp",
+                                "SPARQL": "?country p:P35/ps:P35 ?hos",
+                                "Explanation": "Retrieve the head of state (?hos) for each country (?country). Here, <p:P35> is the property for [head of state], and <ps:P35> is the statement for [head of state]."
+                            },
+                            {
+                                "Module": "optional",
+                                "SPARQL": "OPTIONAL {?hos wdt:P26 ?spouse}",
+                                "Explanation": "Optionally retrieve the spouses (?spouse) of each head of state (?hos). Here, <wdt:P26> is the property for [spouse]."
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "wdt",
+                "URI": "http://www.wikidata.org/prop/direct/",
+                "Explanation": "Used to reference direct properties in Wikidata."
+            },
+            {
+                "Prefix": "p",
+                "URI": "http://www.wikidata.org/prop/",
+                "Explanation": "Used to reference properties in Wikidata."
+            },
+            {
+                "Prefix": "ps",
+                "URI": "http://www.wikidata.org/prop/statement/",
+                "Explanation": "Used to reference statement values of properties in Wikidata."
+            }
+        ]
+    }
+}

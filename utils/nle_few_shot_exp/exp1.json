@@ -1,0 +1,52 @@
+{
+    "Overall NL explanation": "This SPARQL query determines which desert is larger between the Sahara Desert and the Arabian Desert by comparing their areas. It selects the area of the Sahara (`wd:Q6583`) and binds it to the variable `?as`, and the area of the Arabian Desert (`wd:Q208299`) binding it to `?aa`, both using the property for area (`wdt:P2046`). It then uses a conditional `BIND` function to compare these two area values: if the Sahara Desert's area `?as` is greater than the Arabian Desert's area `?aa`, it binds the result variable `?result` to the Sahara Desert's entity; otherwise, it binds it to the Arabian Desert's entity. The query ultimately returns the entity corresponding to the larger desert based on their areas.",
+    "Query Type": {
+        "SPARQL": "SELECT DISTINCT ?result",
+        "Explanation": "This is a SELECT query that retrieves data from the dataset. The DISTINCT keyword ensures that only unique results are returned."
+    },
+    "Variables": {
+        "Description": "The query retrieves the following variable:",
+        "Variables": [
+            {
+                "Variable": "?result",
+                "SPARQL": "SELECT DISTINCT ?result",
+                "Explanation": "This variable (?result) will hold the entity (desert) that is determined to be bigger based on the comparison."
+            }
+        ]
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "bgp",
+                "SPARQL": "wd:Q6583 wdt:P2046 ?as.",
+                "Explanation": "Retrieve the area (?as) of the [Sahara] <wd:Q6583>. Here, <wd:Q6583> is the entity for [Sahara], and <wdt:P2046> indicates the property for [area]."
+            },
+            {
+                "Module": "bgp",
+                "SPARQL": "wd:Q208299 wdt:P2046 ?aa.",
+                "Explanation": "Retrieve the area (?aa) of the [Arabian Desert] <wd:Q208299>. Here, <wd:Q208299> is the entity for [Arabian Desert], and <wdt:P2046> indicates the property for [area]."
+            },
+            {
+                "Module": "bind",
+                "SPARQL": "BIND(IF((?as > ?aa), wd:Q6583, wd:Q208299) AS ?result)",
+                "Explanation": "Compare the areas of the Sahara Desert (?as) and that of the Arabian Desert (?aa). If the area of the Sahara Desert (?as) is greater than the area of the Arabian Desert (?aa), bind (?result) to [Sahara] <wd:Q6583>; otherwise, bind (?result) to [Arabian Desert] <wd:Q208299>."
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "wdt",
+                "URI": "http://www.wikidata.org/prop/direct/",
+                "Explanation": "Used to reference direct properties in Wikidata."
+            }
+        ]
+    }
+}

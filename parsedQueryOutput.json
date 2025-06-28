@@ -1,0 +1,107 @@
+{
+  "queryType": "SELECT",
+  "variables": [
+    {
+      "termType": "Variable",
+      "value": "lifespan"
+    }
+  ],
+  "where": [
+    {
+      "type": "bgp",
+      "triples": [
+        {
+          "subject": {
+            "termType": "Variable",
+            "value": "dog"
+          },
+          "predicate": {
+            "termType": "NamedNode",
+            "value": "http://www.wikidata.org/prop/direct/P31"
+          },
+          "object": {
+            "termType": "NamedNode",
+            "value": "http://www.wikidata.org/entity/Q144"
+          }
+        },
+        {
+          "subject": {
+            "termType": "Variable",
+            "value": "dog"
+          },
+          "predicate": {
+            "termType": "NamedNode",
+            "value": "http://www.wikidata.org/prop/direct/P569"
+          },
+          "object": {
+            "termType": "Variable",
+            "value": "birthDate"
+          }
+        },
+        {
+          "subject": {
+            "termType": "Variable",
+            "value": "dog"
+          },
+          "predicate": {
+            "termType": "NamedNode",
+            "value": "http://www.wikidata.org/prop/direct/P570"
+          },
+          "object": {
+            "termType": "Variable",
+            "value": "deathDate"
+          }
+        }
+      ]
+    },
+    {
+      "type": "bind",
+      "variable": {
+        "termType": "Variable",
+        "value": "lifespan"
+      },
+      "expression": {
+        "type": "operation",
+        "operator": "-",
+        "args": [
+          {
+            "type": "operation",
+            "operator": "year",
+            "args": [
+              {
+                "termType": "Variable",
+                "value": "deathDate"
+              }
+            ]
+          },
+          {
+            "type": "operation",
+            "operator": "year",
+            "args": [
+              {
+                "termType": "Variable",
+                "value": "birthDate"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "order": [
+    {
+      "expression": {
+        "termType": "Variable",
+        "value": "lifespan"
+      },
+      "descending": true
+    }
+  ],
+  "limit": 1,
+  "offset": 1,
+  "type": "query",
+  "prefixes": {
+    "wd": "http://www.wikidata.org/entity/",
+    "wdt": "http://www.wikidata.org/prop/direct/"
+  }
+}

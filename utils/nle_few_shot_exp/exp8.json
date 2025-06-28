@@ -1,0 +1,42 @@
+{
+    "Overall NL explanation": "This SPARQL query identifies the country from which the second highest number of Emmy Award winners originate. It does this by counting the number of Emmy Award winners from each country, ordering these counts in descending order, and then selecting the country with the second highest count.",
+    "Query Type": {
+        "SPARQL": "SELECT ?result",
+        "Explanation": "This is a SELECT query that retrieves data from the dataset. It returns the country with the second most Emmy Award winners."
+    },
+    "Variables": {
+        "Description": "The query retrieves the following variable:",
+        "Variables": [
+            {
+                "Variable": "?result",
+                "SPARQL": "SELECT ?result GROUP BY ?result ORDER BY DESC(COUNT (?result)) OFFSET 1 LIMIT 1",
+                "Explanation": "The variable (?result) holds the country that has the second highest number of Emmy Award winners. The results are grouped by (?result) to ensure each country is considered individually |GROUP BY ?result|, and orders the countries by the count of winners in descending order |ORDER BY DESC(COUNT (?result))|. Then skips the first result |OFFSET 1| and limit only the top result remaining |LIMIT 1|. We use both clauses together to select the second highest result."
+            }
+        ]
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "bgp",
+                "SPARQL": "?person wdt:P166 wd:Q123737; wdt:P27 ?result",
+                "Explanation": "Identify individuals (?person) who have received the [Emmy Award] <wd:Q123737> and determine their country of citizenship (?result). Here, <wdt:P166> is the property for [award received], and <wdt:P27> is the property for [country of citizenship]."
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "wdt",
+                "URI": "http://www.wikidata.org/prop/direct/",
+                "Explanation": "Used to reference direct properties in Wikidata."
+            }
+        ]
+    }
+}

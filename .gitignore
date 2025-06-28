@@ -1,0 +1,11 @@
+__pycache__/
+*.log
+node_modules/
+eval_results/
+temp_res_folder/
+package-lock.json
+package.json
+*.ipynb
+*.pyc
+reqs.txt
+run.sh

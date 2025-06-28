@@ -1,0 +1,72 @@
+{
+    "Overall NL explanation": "This SPARQL query calculates the number of distinct individuals who have won either the Nobel Prize in Literature or the Nobel Prize in Physics since the year 2000. It does this by identifying people who have received these awards and filtering the results to include only those awarded after the year 2000. The query then counts the distinct individuals who meet these criteria.",
+    "Query Type": {
+        "SPARQL": "SELECT (COUNT (DISTINCT ?result) AS ?resultCnt)",
+        "Explanation": "This is a SELECT query that retrieves data from the dataset. It uses an aggregate function COUNT with DISTINCT to count the number of unique individuals who have won the specified awards."
+    },
+    "Variables": {
+        "Description": "The query retrieves the following variable:",
+        "Variables": [
+            {
+                "Variable": "?resultCnt",
+                "SPARQL": "SELECT (COUNT (DISTINCT ?result) AS ?resultCnt)",
+                "Explanation": "The variable (?resultCnt) holds the count of distinct individuals (?result) who have won the specified Nobel Prizes since 2000 |(COUNT (DISTINCT ?result) AS ?resultCnt)|."
+            }
+        ]
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "bgp",
+                "SPARQL": "?result wdt:P31 wd:Q5",
+                "Explanation": "Identify entities (?result) that are instances of [humans] <wd:Q5>. Here, <wdt:P31> is the property for [instance of], and <wd:Q5> is the entity for [human]."
+            },
+            {
+                "Module": "bgp",
+                "SPARQL": "?result p:P166 ?ps",
+                "Explanation": "Retrieve the awards (?ps) received by the individuals (?result). Here, <p:P166> is the property for [award received]."
+            },
+            {
+                "Module": "union",
+                "SPARQL": "{?ps ps:P166 wd:Q37922} UNION {?ps ps:P166 wd:Q38104}",
+                "Explanation": "Check if the award (?ps) is either the [Nobel Prize in Literature] <wd:Q37922> or the [Nobel Prize in Physics] <wd:Q38104>. The UNION allows for either condition to be true."
+            },
+            {
+                "Module": "bgp",
+                "SPARQL": "?ps pq:P585 ?time",
+                "Explanation": "Retrieve the point in time (?time) when the award (?ps) was received. Here, <pq:P585> is the property for [point in time]."
+            },
+            {
+                "Module": "filter",
+                "SPARQL": "FILTER(YEAR(?time) > 2000)",
+                "Explanation": "Apply a filter to include only those awards received after the year 2000. The YEAR function extracts the year from the ?time variable."
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "wdt",
+                "URI": "http://www.wikidata.org/prop/direct/",
+                "Explanation": "Used to reference direct properties in Wikidata."
+            },
+            {
+                "Prefix": "p",
+                "URI": "http://www.wikidata.org/prop/",
+                "Explanation": "Used to reference properties in Wikidata."
+            },
+            {
+                "Prefix": "pq",
+                "URI": "http://www.wikidata.org/prop/qualifier/",
+                "Explanation": "Used to reference qualifiers of properties in Wikidata."
+            }
+        ]
+    }
+}

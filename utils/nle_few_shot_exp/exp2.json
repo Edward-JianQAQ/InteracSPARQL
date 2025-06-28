@@ -1,0 +1,61 @@
+{
+    "Overall NL explanation": "This SPARQL query checks if Adam Ondra has ever been a winner of the IFSC Climbing World Cup. It does this by verifying if there is any record of Adam Ondra participating in the IFSC Climbing World Cup and either achieving a rank of 1 or receiving a gold medal. The query uses an ASK query type, which returns a boolean value (true or false) indicating whether the specified conditions are met.",
+    "Query Type": {
+        "SPARQL": "ASK",
+        "Explanation": "This is an ASK query that checks for the existence of data in the dataset. It returns a boolean value: true if the conditions are met, and false otherwise."
+    },
+    "Variables": {
+        "Description": "The query does not return any variables. It only checks whether certain conditions are met.",
+        "Explanation": "Since this is an ASK query, it does not return specific data but rather checks for the presence of data that meets the criteria."
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "bgp",
+                "SPARQL": "wd:Q350568 p:P1344 ?ps",
+                "Explanation": "Check if [Adam Ondra] <wd:Q350568> has participated in any event (?ps). Here, <p:P1344> is the property for [participant in], and (?ps) is the variable representing the event."
+            },
+            {
+                "Module": "bgp",
+                "SPARQL": "?ps ps:P1344/wdt:P3450* wd:Q1774251",
+                "Explanation": "Verify if the event (?ps) is the [IFSC Climbing World Cup] <wd:Q1774251>. This involves following a path from <ps:P1344> [participant in] followed by zero or more steps of <wdt:P3450> [sports season of league or competition] to <wd:Q1774251>, which is the entity for [IFSC Climbing World Cup]."
+            },
+            {
+                "Module": "union",
+                "SPARQL": "{?ps pq:P1352 ?rank} UNION {?ps pq:P166 ?gold}",
+                "Explanation": "Check if the Adam Ondra's participation (?ps) includes either 1) a ranking (?rank) or 2) an award (?gold) and retrieve them if any. The union allows for either condition to be true. <pq:P1352> is the property for [ranking], and <pq:P166> is the property for [award received]."
+            },
+            {
+                "Module": "filter",
+                "SPARQL": "FILTER(?rank = 1 || sameTerm(?gold,wd:Q406039))",
+                "Explanation": "Apply a filter to include results where the rank (?rank) is 1 or the award (?gold) is a [gold medal] <wd:Q406039>. <wd:Q406039> is the entity for [gold medal]."
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "p",
+                "URI": "http://www.wikidata.org/prop/",
+                "Explanation": "Used to reference properties in Wikidata."
+            },
+            {
+                "Prefix": "ps",
+                "URI": "http://www.wikidata.org/prop/statement/",
+                "Explanation": "Used to reference statement values of properties in Wikidata."
+            },
+            {
+                "Prefix": "pq",
+                "URI": "http://www.wikidata.org/prop/qualifier/",
+                "Explanation": "Used to reference qualifiers of properties in Wikidata."
+            }
+        ]
+    }
+}

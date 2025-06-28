@@ -1,0 +1,84 @@
+{
+    "Overall NL explanation": "This SPARQL query identifies which NBA teams have won the most seasons. It does this by first counting the number of distinct seasons each team has won and then selecting the team with the highest count. The query uses a subquery to determine the maximum number of seasons won by any team and then filters the main query to return the team(s) that match this maximum count.",
+    "Query Type": {
+        "SPARQL": "SELECT DISTINCT ?result",
+        "Explanation": "This is a SELECT query that retrieves data from the dataset. The DISTINCT keyword ensures that only unique results are returned."
+    },
+    "Variables": {
+        "Description": "The query retrieves the following variable:",
+        "Variables": [
+            {
+                "Variable": "?result",
+                "SPARQL": "SELECT DISTINCT ?result GROUP BY ?result HAVING ((COUNT(DISTINCT ?season)) = MAX(?max))",
+                "Explanation": "The variable (?result) holds the NBA team(s) that have won the most seasons | DISTINCT ?result|. The results are grouped by (?result) to ensure each team is considered individually |GROUP BY ?result|, and the HAVING clause filters to include only those teams whose count of distinct seasons won matches the maximum count (?max) determined by the subquery |HAVING ((COUNT(DISTINCT ?season)) = MAX(?max))|."
+            }
+        ]
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "group (subquery)",
+                "SPARQL": "{SELECT DISTINCT (COUNT(DISTINCT ?season) AS ?max) WHERE {?season wdt:P31 wd:Q27020041; wdt:P3450 wd:Q155223; wdt:P1346 ?result. ?result wdt:P31 wd:Q13393265} GROUP BY ?result ORDER BY DESC (?max) LIMIT 1}",
+                "Explanation": "This subquery calculates the maximum number of distinct seasons won by any NBA team. It groups the results by each team (?result) |GROUP BY| and orders them by the count of seasons won (?max) |ORDER BY| in descending order |DESC|, limiting the results to the top entry |LIMIT 1|.",
+                "Subquery Pattern": {
+                    "Overall NL explanation": "The subquery determines the maximum number of seasons won by any NBA team by counting the distinct seasons each team has won. It groups the results by team and orders them in descending order, selecting the top result.",
+                    "Query Type": {
+                        "SPARQL": "SELECT DISTINCT (COUNT(DISTINCT ?season) AS ?max)",
+                        "Explanation": "This is a SELECT query that counts the distinct seasons won by each team and identifies the maximum count."
+                    },
+                    "Variables": {
+                        "Description": "The subquery retrieves the following variable:",
+                        "Variables": [
+                            {
+                                "Variable": "?max",
+                                "SPARQL": "SELECT DISTINCT (COUNT(DISTINCT ?season) AS ?max) GROUP BY ?result ORDER BY DESC (?max) LIMIT 1",
+                                "Explanation": "The variable (?max) holds the maximum count of distinct seasons won by any NBA team |DISTINCT (COUNT(DISTINCT ?season) AS ?max)|. The results are grouped by team (?result) |GROUP BY ?result|, ordered by (?max) in descending order |ORDER BY DESC (?max)|, and limited to the top result |LIMIT 1|."
+                            }
+                        ]
+                    },
+                    "Patterns": {
+                        "Description": "The subquery includes the following patterns and operations:",
+                        "Modules": [
+                            {
+                                "Module": "bgp",
+                                "SPARQL": "?season wdt:P31 wd:Q27020041; wdt:P3450 wd:Q155223; wdt:P1346 ?result",
+                                "Explanation": "Identify seasons (?season) that are instances of [sports season] <wd:27020041> which are [National Basketball Association] <wd:155223> seasons and have a winner (?result). Here <wdt:P31> is the property for [instance of], <wdt:P3450> is the property for [sports season of league or competition], <wdt:P1346> is the property for [winner]."
+                            },
+                            {
+                                "Module": "bgp",
+                                "SPARQL": "?result wdt:P31 wd:Q13393265",
+                                "Explanation": "Ensure that the winner (?result) is an instance of a [basketball team] <wd:13393265>. Here <wdt:P31> is the property for [instance of]."
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "Module": "bgp",
+                "SPARQL": "?season wdt:P31 wd:Q27020041; wdt:P3450 wd:Q155223; wdt:P1346 ?result",
+                "Explanation": "Identify seasons (?season) that are instances of [sports season] <wd:27020041> which are [National Basketball Association] <wd:155223> seasons and have a winner (?result). Here <wdt:P31> is the property for [instance of], <wdt:P3450> is the property for [sports season of league or competition], <wdt:P1346> is the property for [winner]."
+            },
+            {
+                "Module": "bgp",
+                "SPARQL": "?result wdt:P31 wd:Q13393265",
+                "Explanation": "Ensure that the winner (?result) is an instance of a [basketball team] <wd:13393265>. Here <wdt:P31> is the property for [instance of]."
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "wdt",
+                "URI": "http://www.wikidata.org/prop/direct/",
+                "Explanation": "Used to reference direct properties in Wikidata."
+            }
+        ]
+    }
+}

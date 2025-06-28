@@ -1,0 +1,12 @@
+anthropic==0.55.0
+click==8.1.7
+numpy
+openai==1.91.0
+PyYAML==6.0.2
+pyzmq==25.1.2
+regex==2023.3.23
+Requests==2.32.4
+SPARQLWrapper==2.0.0
+tenacity==8.2.3
+tqdm==4.66.2
+vllm==0.8.5.post1

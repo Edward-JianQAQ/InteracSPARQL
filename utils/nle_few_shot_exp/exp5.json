@@ -1,0 +1,78 @@
+{
+    "Overall NL explanation": "This SPARQL query checks if all of Batman's partners speak English as their native language. It does this by identifying all of Batman's partners and checking their native languages. If any partner does not have English as their native language, the query will return false. The query uses an ASK query type, which returns a boolean value (true or false) indicating whether the specified conditions are met.",
+    "Query Type": {
+        "SPARQL": "ASK",
+        "Explanation": "This is an ASK query that checks for the existence of data in the dataset. It returns a boolean value: true if the conditions are met, and false otherwise."
+    },
+    "Variables": {
+        "Description": "The query does not return any variables. It only checks whether certain conditions are met.",
+        "Explanation": "Since this is an ASK query, it does not return specific data but rather checks for the presence of data that meets the criteria."
+    },
+    "Patterns": {
+        "Description": "The query includes the following patterns and operations:",
+        "Modules": [
+            {
+                "Module": "group (subquery)",
+                "SPARQL": "{SELECT (COUNT(DISTINCT ?partner) AS ?pnum) WHERE {wd:Q2695156 wdt:P451 ?partner. ?partner wdt:P103 ?lang. MINUS{?lang wdt:P279* wd:Q1860}}}",
+                "Explanation": "This subquery identifies all of Batman's partners and checks their native languages. It counts the number of partners who do not have English as their native language. If this count is zero, it means all partners speak English natively.",
+                "Subquery Pattern": {
+                    "Overall NL explanation": "The subquery determines how many of Batman's partners do not speak English as their native language. It does this by listing all partners and their native languages, then excluding those who speak English. The result is a count of partners who do not speak English natively.",
+                    "Query Type": {
+                        "SPARQL": "SELECT (COUNT(DISTINCT ?partner) AS ?pnum)",
+                        "Explanation": "This is a SELECT query that counts the distinct partners of Batman who do not speak English as their native language."
+                    },
+                    "Variables": {
+                        "Description": "The subquery retrieves the following variable:",
+                        "Variables": [
+                            {
+                                "Variable": "?pnum",
+                                "SPARQL": "SELECT (COUNT(DISTINCT ?partner) AS ?pnum)",
+                                "Explanation": "The variable (?pnum) holds the count of distinct partners who do not have English as their native language |(COUNT(DISTINCT ?partner) AS ?pnum)|."
+                            }
+                        ]
+                    },
+                    "Patterns": {
+                        "Description": "The subquery includes the following patterns and operations:",
+                        "Modules": [
+                            {
+                                "Module": "bgp",
+                                "SPARQL": "wd:Q2695156 wdt:P451 ?partner",
+                                "Explanation": "Identify [Batman]'s <wd:Q2695156> partners. Here, <wd:Q2695156> is the entity for [Batman], and <wdt:P451> is the property for [unmarried partner]."
+                            },
+                            {
+                                "Module": "bgp",
+                                "SPARQL": "?partner wdt:P103 ?lang",
+                                "Explanation": "Retrieve the native language (?lang) of each partner. Here, <wdt:P103> is the property for [native language]."
+                            },
+                            {
+                                "Module": "minus",
+                                "SPARQL": "MINUS{?lang wdt:P279* wd:Q1860}",
+                                "Explanation": "Exclude partners whose native language (?lang) is [English] <wd:Q1860> or a subclass of [English] <wd:Q1860>. Here, <wd:Q1860> is the entity for [English], and <wdt:P279> is the property for [subclass of]."
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "Module": "filter",
+                "SPARQL": "FILTER(?pnum = 0)",
+                "Explanation": "Apply a filter to check if the count of partners who do not speak English natively (?pnum) is zero."
+            }
+        ]
+    },
+    "Prefixes": {
+        "Description": "The query uses the following prefixes:",
+        "Prefixes": [
+            {
+                "Prefix": "wd",
+                "URI": "http://www.wikidata.org/entity/",
+                "Explanation": "Used to reference entities in Wikidata."
+            },
+            {
+                "Prefix": "wdt",
+                "URI": "http://www.wikidata.org/prop/direct/",
+                "Explanation": "Used to reference direct properties in Wikidata."
+            }
+        ]
+    }
+}
