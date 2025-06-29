@@ -86,7 +86,7 @@ export ANTHROPIC_API_KEY="<your Anthropic key>"
 
 ## Installation
 
-1. **Install **``
+1. **Install**
 
 ```bash
 npm install sparqljs
