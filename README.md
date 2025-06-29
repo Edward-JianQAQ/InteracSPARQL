@@ -32,18 +32,10 @@ For more details on the system architecture, prompt templates, NLE format and ev
   Guide users step-by-step through SPARQL authoring, with continuous, targeted feedback.
 - **Natural Language Explanations**\
   Generate clear, section-by-section NLEs (Natural Language Explanations) for any SPARQL query.
-- **Deterministic Rule-Based Core**\
-  Derive structured explanations from the query’s AST for accuracy and consistency.
-- **LLM-Driven Refinement**\
-  Polish explanations and refine queries via GPT-4o, Claude 3.5 Sonnet, or other LLMs.
 - **Expert-in-the-Loop & Self-Refinement**\
   Support both human oversight and automated LLM “self-refinement” modes.
-- **Real-Time Corrections**\
-  Fix mislabeled entities, ambiguous filters, or incomplete clauses on the fly.
 - **Educational Mode**\
   Serve as an interactive learning guide—ideal for newcomers to SPARQL.
-- **Configurable & Extensible**\
-  All behaviors and model pairings defined via YAML so you can plug in new datasets or LLMs.
 
 ---
 
