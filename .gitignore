@@ -9,4 +9,3 @@ package.json
 *.pyc
 reqs.txt
 run.sh
-parsedQueryOutput.json

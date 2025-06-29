@@ -1,0 +1,35 @@
+{
+  "queryType": "SELECT",
+  "variables": [
+    {
+      "termType": "Variable",
+      "value": "material"
+    }
+  ],
+  "where": [
+    {
+      "type": "bgp",
+      "triples": [
+        {
+          "subject": {
+            "termType": "NamedNode",
+            "value": "http://www.wikidata.org/entity/Q39231"
+          },
+          "predicate": {
+            "termType": "NamedNode",
+            "value": "http://www.wikidata.org/prop/direct/P186"
+          },
+          "object": {
+            "termType": "Variable",
+            "value": "material"
+          }
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "prefixes": {
+    "wd": "http://www.wikidata.org/entity/",
+    "wdt": "http://www.wikidata.org/prop/direct/"
+  }
+}
