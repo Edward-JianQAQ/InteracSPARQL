@@ -27,9 +27,9 @@ self_refine_nle_gen_use_parsed: true
 self_refine_nle_gen_remove_corr: true
 self_refine_nle_gen_remove_few_shot: False
 self_refine_nle_gen_use_raw_query: false
-self_refine_nle_gen_new_NL_exp_prompt: false 
-self_refine_nle_gen_no_comment_remover: true 
-
+self_refine_nle_gen_new_NL_exp_prompt: true 
+self_refine_nle_gen_no_comment_remover: false 
+self_refine_refine_query_no_comment_regen: true 
 
 # --- Self-Refine Feedback Configuration (feedback_config) ---
 self_refine_feedback_llm_name: gpt-4o-2024-08-06
@@ -41,7 +41,6 @@ self_refine_refine_query_model_version: Qwen/Qwen2.5-32B-Instruct
 self_refine_refine_query_temperature: 0.0
 self_refine_refine_query_max_tokens: -1
 self_refine_refine_query_response_format_json: false
-self_refine_refine_query_no_comment_regen: false
 
 # --- Self-Refine Pipeline Control ---
 self_refine_max_iterations: 5
