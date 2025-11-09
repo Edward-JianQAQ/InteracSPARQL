@@ -12,7 +12,7 @@ from utils.wikidata import id2info
 from utils.dbpedia import dbpedia_id2label
 
 def supported_general_models():
-	return ["GPT4o", "Claude", "Qwen2.5", "GPT4o-mini"]
+	return ["GPT4o", "Claude", "Qwen2.5", "GPT4o-mini", "Qwen3", "Gemini2.5", "Claude4.5", "GPT5", "Qwen2.5-OR", "OpenRouter"]
 
 def supported_dataset():
 	return ["QALD10", "QALD9", "LCQUAD2"]

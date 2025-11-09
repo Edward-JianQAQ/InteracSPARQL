@@ -27,6 +27,15 @@ client_open = OpenAI(
     base_url=openai_api_base,
 )
 
+# OpenRouter client
+openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "")
+openrouter_api_base = "https://openrouter.ai/api/v1"
+
+client_openrouter = OpenAI(
+    api_key=openrouter_api_key,
+    base_url=openrouter_api_base,
+)
+
 
 
 
@@ -88,23 +97,22 @@ def llm_call(llm_name, model_version, msg, cfg):
         output = message.content[0].text
 
 
-    elif llm_name == "GPT4o" or llm_name == "GPT4o-mini":
+    elif llm_name == "GPT4o" or llm_name == "GPT4o-mini" or llm_name == "GPT5":
+
+        # Build kwargs, only include max_tokens if it's not None
+        kwargs = {
+            "model": model_version,
+            "messages": msg,
+            "temperature": cfg["temperature"]
+        }
+        if cfg["max_tokens"] is not None:
+            kwargs["max_tokens"] = cfg["max_tokens"]
 
         if cfg["response_format_json"]:
-            message = client.chat.completions.create(
-                model=model_version,
-                messages=msg,
-                max_tokens=cfg["max_tokens"],
-                temperature= cfg["temperature"],
-                response_format={ "type": "json_object"}
-            )
+            kwargs["response_format"] = {"type": "json_object"}
+            message = client.chat.completions.create(**kwargs)
         else:
-            message = client.chat.completions.create(
-                model=model_version,
-                messages=msg,
-                max_tokens=cfg["max_tokens"],
-                temperature= cfg["temperature"]
-            )
+            message = client.chat.completions.create(**kwargs)
 
         output = message.choices[0].message.content
     
@@ -127,6 +135,31 @@ def llm_call(llm_name, model_version, msg, cfg):
                 max_tokens=cfg["max_tokens"],
                 temperature=cfg["temperature"]
             )
+
+        output = chat_response.choices[0].message.content
+
+    # OpenRouter models
+    # Supported models:
+    # "qwen/qwen-3-7b" - Qwen 3 7B
+    # "qwen/qwen-2.5-14b-instruct" - Qwen 2.5 14B
+    # "qwen/qwen-2.5-32b-instruct" - Qwen 2.5 32B
+    # "google/gemini-2.5-flash-preview" - Gemini 2.5 Flash
+    # "anthropic/claude-4.5-sonnet" - Claude 4.5 Sonnet
+    elif llm_name in ["Qwen3", "Qwen2.5-OR", "Gemini2.5", "Claude4.5", "OpenRouter"]:
+        # Build kwargs, only include max_tokens if it's not None
+        kwargs = {
+            "model": model_version,
+            "messages": msg,
+            "temperature": cfg["temperature"]
+        }
+        if cfg["max_tokens"] is not None:
+            kwargs["max_tokens"] = cfg["max_tokens"]
+
+        if cfg.get("response_format_json", False):
+            kwargs["response_format"] = {"type": "json_object"}
+            chat_response = client_openrouter.chat.completions.create(**kwargs)
+        else:
+            chat_response = client_openrouter.chat.completions.create(**kwargs)
 
         output = chat_response.choices[0].message.content
 

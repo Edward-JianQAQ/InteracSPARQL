@@ -2,7 +2,47 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from utils.prefix import extract_suffix, get_rdfs_info, extract_entity_id, extract_entity_info, extract_entity_label, extract_property_label
 from openai import OpenAI
 from utils.utils import check_if_variable_str
-import json, urllib.request # Needed libs
+import json, urllib.request, time # Needed libs
+from urllib.error import URLError, HTTPError
+import socket
+
+# Simple rate limiting: track last request time
+_last_request_time = 0
+_min_request_interval = 0.1  # 100ms between requests
+
+def _urlopen_with_user_agent(url, timeout=10, max_retries=3):
+    """Helper function to open URLs with User-Agent header to avoid 403 errors
+
+    Args:
+        url: URL to fetch
+        timeout: Request timeout in seconds
+        max_retries: Maximum number of retry attempts
+
+    Returns:
+        Response object from urllib
+    """
+    global _last_request_time
+
+    # Rate limiting: ensure minimum interval between requests
+    current_time = time.time()
+    time_since_last = current_time - _last_request_time
+    if time_since_last < _min_request_interval:
+        time.sleep(_min_request_interval - time_since_last)
+
+    req = urllib.request.Request(url, headers={'User-Agent': 'InteracSPARQL/1.0 (Research Project)'})
+
+    for attempt in range(max_retries):
+        try:
+            result = urllib.request.urlopen(req, timeout=timeout)
+            _last_request_time = time.time()
+            return result
+        except (URLError, socket.timeout, HTTPError) as e:
+            if attempt == max_retries - 1:
+                # Last attempt failed, raise the error
+                raise
+            # Wait with exponential backoff before retry
+            wait_time = (2 ** attempt) * 0.5  # 0.5s, 1s, 2s
+            time.sleep(wait_time)
 
 def run_wikidata_query(sparql_query):
     """
@@ -39,17 +79,17 @@ def entity2id(q):
 	# Get wikidata id from wikidata api
 	ans = []
 	url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join(q.split(" "))+"&language=en"
-	response = json.loads(urllib.request.urlopen(url).read())
+	response = json.loads(_urlopen_with_user_agent(url).read())
 	ans += response["search"]
 	if (ans == [] and " " in q):
 
 		url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join(q.split(" ")[::-1])+"&language=en"
-		response = json.loads(urllib.request.urlopen(url).read())
+		response = json.loads(_urlopen_with_user_agent(url).read())
 		ans += response["search"]
 	if (ans == [] and len(q.split(" ")) > 2):
 		# Abbreviation
 		url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join([q.split(" ")[0], q.split(" ")[-1]])+"&language=en"
-		response = json.loads(urllib.request.urlopen(url).read())
+		response = json.loads(_urlopen_with_user_agent(url).read())
 		ans += response["search"]
 	# if len(ans) > 0:
 	# 	# Returns the first one, most likely one
@@ -72,28 +112,28 @@ def entity_id_search_wiki(q):
 def property2id(q):
 	ans = []
 	url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&search="+"+".join(q.split(" "))+"&language=en&type=property&format=json"
-	response = json.loads(urllib.request.urlopen(url).read())
+	response = json.loads(_urlopen_with_user_agent(url).read())
 	ans += response["search"]
 
 	if (ans == [] and " " in q):
 		# Reverse 
 		url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join(q.split(" ")[::-1])+"&language=en&type=property&format=json"
-		response = json.loads(urllib.request.urlopen(url).read())
+		response = json.loads(_urlopen_with_user_agent(url).read())
 		ans += response["search"]
 	if (ans == [] and len(q.split(" ")) > 2):
 		# Abbreviation 
 		url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join([q.split(" ")[0], q.split(" ")[-1]])+"&language=en&type=property&format=json"
-		response = json.loads(urllib.request.urlopen(url).read())
+		response = json.loads(_urlopen_with_user_agent(url).read())
 		ans += response["search"]
 	if (ans == [] and len(q.split(" ")) > 2):
 		# Abbreviation 
 		url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join([q.split(" ")[-2], q.split(" ")[-1]])+"&language=en&type=property&format=json"
-		response = json.loads(urllib.request.urlopen(url).read())
+		response = json.loads(_urlopen_with_user_agent(url).read())
 		ans += response["search"]
 	if (ans == [] and len(q.split(" ")) > 1):
 		# Abbreviation 
 		url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&search="+"+".join([q.split(" ")[-1]])+"&language=en&type=property&format=json"
-		response = json.loads(urllib.request.urlopen(url).read())
+		response = json.loads(_urlopen_with_user_agent(url).read())
 		ans += response["search"]
 	return ans
 
@@ -138,7 +178,12 @@ def id2info(q, only_label=True):
 	ans = []
 	q = q.split('/')[-1]
 	url = "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids="+q+"&languages=en"
-	response = json.loads(urllib.request.urlopen(url).read())
+
+	try:
+		response = json.loads(_urlopen_with_user_agent(url).read())
+	except Exception as e:
+		print(f"Error fetching data from Wikidata for {q}: {e}")
+		return ""
 
 	try:
 		entity_list = list(response['entities'].keys())
@@ -158,7 +203,7 @@ def id2info(q, only_label=True):
 			try:
 				print(f"not en label, try to use mul label")
 				url = "https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids="+q+"&languages=mul"
-				response = json.loads(urllib.request.urlopen(url).read())
+				response = json.loads(_urlopen_with_user_agent(url).read())
 
 				entity_list = list(response['entities'].keys())
 
