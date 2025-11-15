@@ -2,7 +2,10 @@ import requests
 import urllib.parse
 from SPARQLWrapper import SPARQLWrapper, JSON
 import time
+from functools import lru_cache
+import urllib.error
 
+@lru_cache(maxsize=10000)
 def dbpedia_id2label(named_node, only_label=True):
     # Encode the named node for use in the SPARQL query
     named_node_encoded = urllib.parse.quote(named_node)
@@ -37,16 +40,44 @@ def dbpedia_id2label(named_node, only_label=True):
         "format": "application/json"
     }
 
-    response = requests.get(endpoint, params=params)
-    while True:
-        if response.status_code == 502:
-                print("HTTP Error 502: Bad Gateway encountered. Retrying in 10 seconds...")
-                time.sleep(10)
-        else:
-            break
-    if response.status_code != 200:
-        print(f"Failed to fetch data from DBpedia, status code: {response.status_code}")
-        return None
+    # Retry logic with exponential backoff
+    max_retries = 5
+    retry_delay = 10  # Start with 10 seconds
+
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(endpoint, params=params, timeout=30)
+
+            if response.status_code == 502:
+                if attempt < max_retries - 1:
+                    print(f"HTTP Error 502: Bad Gateway encountered. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    print(f"Failed after {max_retries} attempts. Giving up.")
+                    return None
+            elif response.status_code == 200:
+                break  # Success
+            else:
+                print(f"Failed to fetch data from DBpedia, status code: {response.status_code}")
+                return None
+
+        except requests.exceptions.Timeout:
+            if attempt < max_retries - 1:
+                print(f"Request timeout. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(retry_delay)
+                retry_delay *= 2
+                continue
+            else:
+                print(f"Request timed out after {max_retries} attempts.")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {e}")
+            return None
+
+    # Add a small delay to avoid overwhelming the endpoint
+    time.sleep(0.5)
 
     data = response.json()
     #print(data)
@@ -209,8 +240,31 @@ def search_dbpedia_properties(q, limit=50):
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
 
-    # Execute the query
-    results = sparql.query().convert()
+    # Execute the query with retry logic
+    max_retries = 5
+    retry_delay = 10
+
+    for attempt in range(max_retries):
+        try:
+            results = sparql.query().convert()
+            break  # Exit the loop if successful
+        except urllib.error.HTTPError as e:
+            if e.code == 502:
+                if attempt < max_retries - 1:
+                    print(f"HTTP Error 502: Bad Gateway encountered in search_dbpedia_properties. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                else:
+                    print(f"Failed after {max_retries} attempts in search_dbpedia_properties.")
+                    return []
+            else:
+                raise  # Re-raise any other HTTPError
+        except Exception as e:
+            print(f"Error in search_dbpedia_properties: {e}")
+            return []
+
+    # Add a small delay to avoid overwhelming the endpoint
+    time.sleep(0.5)
 
     # Extract results into the desired format
     formatted_results = []
@@ -220,7 +274,7 @@ def search_dbpedia_properties(q, limit=50):
             'Label': result.get('Label', {}).get('value'),
             'Description': result.get('Description', {}).get('value', '')
         })
-    
+
     return formatted_results
 
 

@@ -33,23 +33,34 @@ def execute_sparql_query_wiki(query: str) -> Union[Set[Tuple], bool]:
     return result_set
 
 def execute_sparql_query_dbpedia(query: str)-> Union[Set[Tuple], bool]:
-    # sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    # sparql.setQuery(query)
-    # sparql.setReturnFormat(JSON)
-    while True:
+    # Execute query with retry logic and exponential backoff
+    max_retries = 5
+    retry_delay = 10
+
+    for attempt in range(max_retries):
         try:
             sparql = SPARQLWrapper("http://dbpedia.org/sparql")
             sparql.setQuery(query)
             sparql.setReturnFormat(JSON)
             results = sparql.query().convert()
-            break  # Exit the loop if the function call is successful
+            break  # Exit the loop if successful
         except urllib.error.HTTPError as e:
             if e.code == 502:
-                print("HTTP Error 502: Bad Gateway encountered. Retrying in 10 seconds...")
-                time.sleep(10)
+                if attempt < max_retries - 1:
+                    print(f"HTTP Error 502: Bad Gateway encountered in execute_sparql_query_dbpedia. Retrying in {retry_delay} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                else:
+                    print(f"Failed after {max_retries} attempts. Returning empty set.")
+                    return set()
             else:
-                raise  # Re-raise any other HTTPError that is not a 502 error
-    # results = sparql.query().convert()
+                raise  # Re-raise any other HTTPError
+        except Exception as e:
+            print(f"Error executing SPARQL query on DBpedia: {e}")
+            return set()
+
+    # Add a small delay to avoid overwhelming the endpoint
+    time.sleep(0.5)
     result_set = set()
     if 'results' in results and 'bindings' in results['results']:
         for result in results['results']['bindings']:

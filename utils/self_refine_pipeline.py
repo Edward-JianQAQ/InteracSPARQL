@@ -161,6 +161,10 @@ def feedback_module(question, sparql_query, nl_explanation, query_results, feedb
 	"""
 	from openai import OpenAI
 	client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+	# Debug logging
+	print(f"[DEBUG] Feedback generation - Model: {feedback_config['llm_name']}, Temperature: {feedback_config['temperature']}")
+
 	# system_prompt = (
 	#     "You are an expert in SPARQL query evaluation and refinement. Analyze the SPARQL query, its natural language explanation, and the query results. "
 	#     "Return your feedback as a JSON object with keys 'decision' (a boolean) and 'advise' (a string with suggestions)."
@@ -221,13 +225,32 @@ def feedback_module(question, sparql_query, nl_explanation, query_results, feedb
 		{"role": "system", "content": system_prompt},
 		{"role": "user", "content": user_prompt}
 	]
-	response = client.chat.completions.create(
-		model=feedback_config["llm_name"],
-		response_format={"type": "json_object"},
-		temperature=feedback_config["temperature"],
-		messages=messages,
-		tools=(tools_wiki if kg_name == "wiki" else tools_dbpedia) if use_tools else None
-	)
+
+	# Debug: Print exact API call parameters
+	api_params = {
+		"model": feedback_config["llm_name"],
+		"response_format": {"type": "json_object"},
+		"temperature": feedback_config["temperature"],
+		"messages": f"[{len(messages)} messages]",
+		"tools": "Yes" if ((tools_wiki if kg_name == "wiki" else tools_dbpedia) if use_tools else None) else "No"
+	}
+	print(f"[DEBUG] API call params: {api_params}")
+
+	try:
+		response = client.chat.completions.create(
+			model=feedback_config["llm_name"],
+			response_format={"type": "json_object"},
+			temperature=feedback_config["temperature"],
+			messages=messages,
+			tools=(tools_wiki if kg_name == "wiki" else tools_dbpedia) if use_tools else None
+		)
+	except Exception as e:
+		print(f"[ERROR] OpenAI API call failed!")
+		print(f"[ERROR] Exception type: {type(e).__name__}")
+		print(f"[ERROR] Exception message: {str(e)}")
+		if hasattr(e, 'response'):
+			print(f"[ERROR] Response: {e.response}")
+		raise
 	calls = response.choices[0].message.tool_calls
 	if calls:
 		new_msgs = [
@@ -248,12 +271,20 @@ def feedback_module(question, sparql_query, nl_explanation, query_results, feedb
 					"tool_call_id": call.id
 				}
 				new_msgs.append(tool_reply)
-		response = client.chat.completions.create(
-			model=feedback_config["llm_name"],
-			response_format={"type": "json_object"},
-			temperature=feedback_config["temperature"],
-			messages=new_msgs
-		)
+
+		print(f"[DEBUG] Second API call (with tool results) - Model: {feedback_config['llm_name']}")
+		try:
+			response = client.chat.completions.create(
+				model=feedback_config["llm_name"],
+				response_format={"type": "json_object"},
+				temperature=feedback_config["temperature"],
+				messages=new_msgs
+			)
+		except Exception as e:
+			print(f"[ERROR] OpenAI API call (with tools) failed!")
+			print(f"[ERROR] Exception type: {type(e).__name__}")
+			print(f"[ERROR] Exception message: {str(e)}")
+			raise
 	feedback_str = response.choices[0].message.content.strip()
 	try:
 		return json.loads(feedback_str)
@@ -272,6 +303,9 @@ def feedback_module_1(question, sparql_query, nl_explanation, query_results, fee
     """
 
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+    # Debug logging
+    print(f"[DEBUG] Feedback module 1 - Model: {feedback_config['llm_name']}, Temperature: {feedback_config['temperature']}")
 
     # System prompt for role definition
     system_prompt = (
@@ -329,13 +363,30 @@ Respond with *only* a valid JSON object as shown in the examples.
         tools = tools_wiki if kg_name == "wiki" else tools_dbpedia
 
     # Initial model call
-    response = client.chat.completions.create(
-        model=feedback_config["llm_name"],
-        response_format={"type": "json_object"},
-        temperature=feedback_config["temperature"],
-        messages=messages,
-        tools=tools
-    )
+    api_params = {
+        "model": feedback_config["llm_name"],
+        "response_format": {"type": "json_object"},
+        "temperature": feedback_config["temperature"],
+        "messages": f"[{len(messages)} messages]",
+        "tools": "Yes" if tools else "No"
+    }
+    print(f"[DEBUG] API call params (module 1): {api_params}")
+
+    try:
+        response = client.chat.completions.create(
+            model=feedback_config["llm_name"],
+            response_format={"type": "json_object"},
+            temperature=feedback_config["temperature"],
+            messages=messages,
+            tools=tools
+        )
+    except Exception as e:
+        print(f"[ERROR] OpenAI API call failed (module 1)!")
+        print(f"[ERROR] Exception type: {type(e).__name__}")
+        print(f"[ERROR] Exception message: {str(e)}")
+        if hasattr(e, 'response'):
+            print(f"[ERROR] Response: {e.response}")
+        raise
 
     # Handle tool calls if any
     calls = response.choices[0].message.tool_calls
@@ -355,12 +406,19 @@ Respond with *only* a valid JSON object as shown in the examples.
                 new_msgs.append(tool_reply)
 
         # Second pass with tool results
-        response = client.chat.completions.create(
-            model=feedback_config["llm_name"],
-            response_format={"type": "json_object"},
-            temperature=feedback_config["temperature"],
-            messages=new_msgs
-        )
+        print(f"[DEBUG] Second API call (with tool results, module 1) - Model: {feedback_config['llm_name']}")
+        try:
+            response = client.chat.completions.create(
+                model=feedback_config["llm_name"],
+                response_format={"type": "json_object"},
+                temperature=feedback_config["temperature"],
+                messages=new_msgs
+            )
+        except Exception as e:
+            print(f"[ERROR] OpenAI API call (with tools, module 1) failed!")
+            print(f"[ERROR] Exception type: {type(e).__name__}")
+            print(f"[ERROR] Exception message: {str(e)}")
+            raise
 
     # Final output parsing
     feedback_str = response.choices[0].message.content.strip()
