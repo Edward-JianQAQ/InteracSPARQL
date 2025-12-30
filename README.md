@@ -5,14 +5,6 @@ Refinement Using Natural Language Explanations**
 
 ---
 
-## Appendix
-
-For more details on the system architecture, prompt templates, NLE format and evaluation protocol, please refer to the appendix document available in the repository:
-
-📄 [`Technical Appendix`](./appendix.pdf)
-
----
-
 ## Table of Contents
 
 - [Features](#features)
