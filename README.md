@@ -119,8 +119,4 @@ python exp_sum.py \
 
 Both directories are created automatically if they don’t exist.
 
----
 
-## License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
