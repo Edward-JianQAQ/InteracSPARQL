@@ -1,7 +1,7 @@
 # InteracSPARQL
 
 Official implementation for **InteracSPARQL: an Interactive Tool for SPARQL Query
-Refinement Using Natural Language Explanations**
+Refinement Using Natural Language Explanations** (You might need to download the whole repo to view some files due to some issues with anonymous GitHub)
 
 ---
 
