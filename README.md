@@ -14,7 +14,6 @@ Refinement Using Natural Language Explanations** (You might need to download the
 - [Configuration](#configuration)
 - [Running Experiments](#running-experiments)
 - [Logging & Results](#logging--results)
-- [License](#license)
 
 ---
 
