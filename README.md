@@ -1,15 +1,7 @@
 # InteracSPARQL
 
 Official implementation for **InteracSPARQL: an Interactive Tool for SPARQL Query
-Refinement Using Natural Language Explanations**
-
----
-
-## Appendix
-
-For more details on the system architecture, prompt templates, NLE format and evaluation protocol, please refer to the appendix document available in the repository:
-
-📄 [`Technical Appendix`](./appendix.pdf)
+Refinement Using Natural Language Explanations** (You might need to download the whole repo to view some files due to some issues with anonymous GitHub)
 
 ---
 
@@ -22,7 +14,6 @@ For more details on the system architecture, prompt templates, NLE format and ev
 - [Configuration](#configuration)
 - [Running Experiments](#running-experiments)
 - [Logging & Results](#logging--results)
-- [License](#license)
 
 ---
 
@@ -127,8 +118,4 @@ python exp_sum.py \
 
 Both directories are created automatically if they don’t exist.
 
----
 
-## License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
