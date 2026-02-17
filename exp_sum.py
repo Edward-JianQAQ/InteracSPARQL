@@ -12,7 +12,7 @@ from utils.wikidata import id2info
 from utils.dbpedia import dbpedia_id2label
 
 def supported_general_models():
-	return ["GPT4o", "Claude", "Qwen2.5", "GPT4o-mini", "Qwen3", "Gemini2.5", "Claude4.5", "GPT5", "Qwen2.5-OR", "OpenRouter"]
+	return ["GPT4o", "Claude", "Qwen2.5", "GPT4o-mini", "Qwen3", "Gemini2.5", "Claude4.5", "GPT5", "Qwen2.5-OR", "OpenRouter", "Qwen3-OR"]
 
 def supported_dataset():
 	return ["QALD10", "QALD9", "LCQUAD2"]
@@ -260,8 +260,19 @@ def data_generation(config):
 			query_gen_wait_time = 1
 			print(f"Query generation wait time not found, using default value {query_gen_wait_time}")
 
+		# Prepare retry config for query generation
+		# Default to False for backward compatibility - only use new retry if explicitly enabled
+		retry_config = {
+			"use_retry_with_backoff": config.get("use_retry_with_backoff", False),
+			"retry_max_attempts": config.get("retry_max_attempts", 5),
+			"retry_min_wait": config.get("retry_min_wait", 4),
+			"retry_max_wait": config.get("retry_max_wait", 60),
+			"retry_on_all_errors": config.get("retry_on_all_errors", False)
+		}
+
 		data_obj.generate_raw_sparql(query_gen_llm_name, query_gen_model_version, query_gen_max_tokens, query_gen_temp,
-									  query_gen_response_format_json, query_gen_max_attempts, query_gen_wait_time)
+									  query_gen_response_format_json, query_gen_max_attempts, query_gen_wait_time,
+									  retry_config=retry_config)
 
 
 	########################## NLE generation ##########################
@@ -313,17 +324,40 @@ def data_generation(config):
 			nle_gen_json_parsable = False
 			print(f"NLE generation json parsable not found, using default value {nle_gen_json_parsable}")
 
+		# Load retry configuration for new retry mechanism
+		# Default to False for backward compatibility - only use new retry if explicitly enabled
+		use_retry_with_backoff = config.get("use_retry_with_backoff", False)
+		retry_max_attempts = config.get("retry_max_attempts", 5)
+		retry_min_wait = config.get("retry_min_wait", 4)
+		retry_max_wait = config.get("retry_max_wait", 60)
+		retry_on_all_errors = config.get("retry_on_all_errors", False)
+
 		def create_llm_call_for_nle_gen(llm_name, model_version, max_tokens, temperature, response_format_json, kg,
 										use_label, use_question, use_layout, use_parsed, json_parsable, max_attempts=3, wait_seconds=1):
 			"""
 			Returns a function (already decorated) that fetches data.
 			"""
-			@make_retry_decorator(max_attempts, wait_seconds)
+			# Only apply old decorator if new retry mechanism is disabled
+			def decorator(func):
+				if use_retry_with_backoff:
+					# New retry mechanism enabled - skip old decorator
+					return func
+				else:
+					# Use old retry decorator
+					return make_retry_decorator(max_attempts, wait_seconds)(func)
+
+			@decorator
 			def nle_gen_call(data_entry):
 				cfg = {
 					"max_tokens": max_tokens,
 					"temperature": temperature,
-					"response_format_json": response_format_json
+					"response_format_json": response_format_json,
+					# Add new retry configuration
+					"use_retry_with_backoff": use_retry_with_backoff,
+					"retry_max_attempts": retry_max_attempts,
+					"retry_min_wait": retry_min_wait,
+					"retry_max_wait": retry_max_wait,
+					"retry_on_all_errors": retry_on_all_errors
 				}
 				if kg == "wiki":
 					label_func = id2info
@@ -415,8 +449,10 @@ def data_generation(config):
 			final_query_gen_nle_key = "nle_str"
 			print(f"Final query generation NLE key not found, using default value {final_query_gen_nle_key}")
 
+		# Use same retry config as raw query generation
 		data_obj.generate_final_sparql(final_query_gen_llm_name, final_query_gen_model_version, final_query_gen_max_tokens, final_query_gen_temp,
-									  final_query_gen_response_format_json, final_query_gen_max_attempts, final_query_gen_wait_time, final_query_gen_nle_key)
+									  final_query_gen_response_format_json, final_query_gen_max_attempts, final_query_gen_wait_time, final_query_gen_nle_key,
+									  retry_config=retry_config)
 	
 
 
